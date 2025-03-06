@@ -36,6 +36,8 @@ public class Account extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private AccountRoleEnum role;
 
+    @Column(name = "profile_picture")
+    private String profilePicture;
 
 
     @Override
