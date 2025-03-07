@@ -4,6 +4,7 @@ import com.warehouse.app.annotations.BaseController;
 import com.warehouse.app.annotations.BaseControllerImpl;
 import com.warehouse.app.controllers.AuthController;
 import com.warehouse.app.dto.request.RequestCreateAccount;
+import com.warehouse.app.dto.request.RequestSignIn;
 import com.warehouse.app.dto.response.BaseResponse;
 import com.warehouse.app.services.AuthService;
 import com.warehouse.app.utilities.ResponseHelper;
@@ -18,5 +19,10 @@ public class AuthControllerImpl implements AuthController {
     @Override
     public BaseResponse register(RequestCreateAccount requestCreateAccount) {
         return ResponseHelper.createBaseResponse(authService.register(requestCreateAccount));
+    }
+
+    @Override
+    public BaseResponse signInAdmin(RequestSignIn requestSignIn) {
+        return ResponseHelper.createBaseResponse(authService.signIn(requestSignIn));
     }
 }

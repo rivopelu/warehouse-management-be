@@ -1,13 +1,23 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateAccount;
+import com.warehouse.app.dto.request.RequestSignIn;
+import com.warehouse.app.dto.response.ResponseSignIn;
 import com.warehouse.app.entities.Account;
 import com.warehouse.app.enums.AccountRoleEnum;
 import com.warehouse.app.exception.BadRequestException;
+import com.warehouse.app.exception.SystemErrorException;
 import com.warehouse.app.repositories.AccountRepository;
 import com.warehouse.app.services.AuthService;
+import com.warehouse.app.services.JwtService;
 import com.warehouse.app.utilities.EntityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +32,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final PasswordEncoder passwordEncoder;
     private final AccountRepository accountRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Override
     public String register(RequestCreateAccount requestCreateAccount) {
@@ -41,11 +53,51 @@ public class AuthServiceImpl implements AuthService {
                 .phoneNumber(requestCreateAccount.getPhoneNumber())
                 .role(AccountRoleEnum.ADMIN)
                 .build();
-        String id = UUID.randomUUID().toString();
-        account.setId(id);
-        EntityUtils.created(account, id);
-        accountRepository.save(account);
+       try {
+           String id = UUID.randomUUID().toString();
+           account.setId(id);
+           EntityUtils.created(account, id);
+           accountRepository.save(account);
+           return getMessage("success");
+       }catch (Exception e){
+           throw new SystemErrorException(e);
+       }
+    }
 
-        return getMessage("success");
+    @Override
+    public ResponseSignIn signIn(RequestSignIn requestSignIn) {
+       Account account = accountRepository.findByEmailAndActiveIsTrue(requestSignIn.getEmail()).orElseThrow(() -> new BadRequestException(getMessage("failed.login")));
+       if (!account.getRole().equals(AccountRoleEnum.ADMIN)) {
+           throw new BadRequestException(getMessage("failed.login"));
+       }
+        return buildSignIn(account, requestSignIn.getPassword());
+    }
+
+    private ResponseSignIn buildSignIn(Account account, String password) {
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(account.getEmail(), password));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String jwt = jwtService.generateToken(userDetails);
+            ResponseSignIn.AccountData accountData = buildAccountData(account);
+            return ResponseSignIn.builder().accessToken(jwt)
+                    .accountData(accountData)
+                    .build();
+        } catch (BadCredentialsException e) {
+            throw new BadRequestException(getMessage("failed.login"));
+        } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    private ResponseSignIn.AccountData buildAccountData(Account account) {
+        return ResponseSignIn.AccountData.builder()
+                .id(account.getId())
+                .email(account.getEmail())
+                .phoneNumber(account.getPhoneNumber())
+                .role(account.getRole())
+                .profilePicture(account.getProfilePicture())
+                .build();
     }
 }
