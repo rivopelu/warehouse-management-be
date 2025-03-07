@@ -18,4 +18,9 @@ public class WarehouseControllerImpl implements WarehouseController {
     public BaseResponse createWarehouse(RequestCreateWarehouse req) {
         return ResponseHelper.createBaseResponse(warehouseService.createWarehouse(req));
     }
+
+    @Override
+    public BaseResponse editWarehouse(RequestCreateWarehouse req, String id) {
+        return ResponseHelper.createBaseResponse(warehouseService.editWarehouse(req, id));
+    }
 }

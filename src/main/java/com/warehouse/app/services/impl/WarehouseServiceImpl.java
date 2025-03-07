@@ -40,4 +40,20 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new SystemErrorException(e);
         }
     }
+
+    @Override
+    public String editWarehouse(RequestCreateWarehouse req, String id) {
+        Warehouse warehouse = warehouseRepository.findByIdAndActiveIsTrue(id).orElseThrow(() -> new NotFoundException(getMessage("warehouse.not.found")));
+        SubDistrict subDistrict = subDistrictRepository.findById(req.getSubDistrictId()).orElseThrow(() -> new NotFoundException(getMessage("sub.district.not.found")));
+        try {
+            warehouse.setName(req.getName());
+            warehouse.setAddress(req.getAddress());
+            warehouse.setSubDistrict(subDistrict);
+            EntityUtils.updated(warehouse, accountService.getCurrentAccountId());
+            warehouseRepository.save(warehouse);
+            return getMessage("warehouse.updated");
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
 }

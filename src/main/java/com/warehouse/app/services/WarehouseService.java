@@ -6,4 +6,6 @@ import com.warehouse.app.entities.Warehouse;
 public interface WarehouseService {
 
     String createWarehouse(RequestCreateWarehouse req);
+
+    String editWarehouse(RequestCreateWarehouse req, String id);
 }
