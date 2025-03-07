@@ -17,7 +17,7 @@ public class Warehouse extends BaseEntity {
 
     @JoinColumn(name = "sub_district_id")
     @ManyToOne
-    private SubDistrict subDistrictId;
+    private SubDistrict subDistrict;
 
     @Column(name = "address")
     private String address;

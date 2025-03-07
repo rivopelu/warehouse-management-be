@@ -11,5 +11,6 @@
         <include file="db/changelog/1.1.1_add_table_city.xml"/>
         <include file="db/changelog/1.1.2_add_table_district.xml"/>
         <include file="db/changelog/1.1.3_add_table_sub_district.xml"/>
-        <include file="db/changelog/1.2.0_add_table_warehouse.xml "/>
+        <include file="db/changelog/1.2.0_add_table_warehouse.xml"/>
+        <include file="db/changelog/1.2.1_add_foreign_key_warehouse_to_sub_district.xml"/>
 </databaseChangeLog>
