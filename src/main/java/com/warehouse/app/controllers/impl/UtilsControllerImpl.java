@@ -9,6 +9,6 @@ import com.warehouse.app.utilities.ResponseHelper;
 public class UtilsControllerImpl implements UtilsController {
     @Override
     public BaseResponse ping() {
-        return ResponseHelper.createBaseResponse("Pong");
+        return ResponseHelper.createBaseResponse("Peng");
     }
 }
