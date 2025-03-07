@@ -9,4 +9,5 @@
         <include file="db/changelog/1.0.1_add_column_profile_picture.xml"/>
         <include file="db/changelog/1.1.0_add_table_province.xml"/>
         <include file="db/changelog/1.1.1_add_table_city.xml"/>
+        <include file="db/changelog/1.1.2_add_table_district.xml"/>
 </databaseChangeLog>
