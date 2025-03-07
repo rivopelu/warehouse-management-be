@@ -39,6 +39,7 @@ public class AccountServiceImpl implements AccountService {
                     .phoneNumber(account.getPhoneNumber())
                     .role(account.getRole())
                     .profilePicture(account.getProfilePicture())
+                    .name(account.getName())
                     .build();
 
         }catch (Exception e) {

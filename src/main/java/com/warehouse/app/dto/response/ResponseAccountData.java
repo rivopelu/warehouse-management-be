@@ -24,4 +24,5 @@ public class ResponseAccountData {
     private String phoneNumber;
     private AccountRoleEnum role;
     private String profilePicture;
+    private String name;
 }

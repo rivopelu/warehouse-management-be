@@ -97,6 +97,7 @@ public class AuthServiceImpl implements AuthService {
                 .id(account.getId())
                 .email(account.getEmail())
                 .phoneNumber(account.getPhoneNumber())
+                .name(account.getName())
                 .role(account.getRole())
                 .profilePicture(account.getProfilePicture())
                 .build();
