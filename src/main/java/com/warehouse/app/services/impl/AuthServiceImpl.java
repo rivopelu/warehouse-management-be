@@ -2,6 +2,7 @@ package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateAccount;
 import com.warehouse.app.dto.request.RequestSignIn;
+import com.warehouse.app.dto.response.ResponseAccountData;
 import com.warehouse.app.dto.response.ResponseSignIn;
 import com.warehouse.app.entities.Account;
 import com.warehouse.app.enums.AccountRoleEnum;
@@ -80,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String jwt = jwtService.generateToken(userDetails);
-            ResponseSignIn.AccountData accountData = buildAccountData(account);
+            ResponseAccountData accountData = buildAccountData(account);
             return ResponseSignIn.builder().accessToken(jwt)
                     .accountData(accountData)
                     .build();
@@ -91,8 +92,8 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private ResponseSignIn.AccountData buildAccountData(Account account) {
-        return ResponseSignIn.AccountData.builder()
+    private ResponseAccountData buildAccountData(Account account) {
+        return ResponseAccountData.builder()
                 .id(account.getId())
                 .email(account.getEmail())
                 .phoneNumber(account.getPhoneNumber())
