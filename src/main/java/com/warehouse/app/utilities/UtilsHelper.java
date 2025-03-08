@@ -20,8 +20,8 @@ public class UtilsHelper {
         return "https://ui-avatars.com/api/?name=" + name;
     }
 
-
     public static String getMessage(String key) {
         return messageSource.getMessage(key, null, Locale.ENGLISH);
     }
+
 }

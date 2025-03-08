@@ -1,20 +1,27 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateAccount;
+import com.warehouse.app.dto.request.RequestSettingPrivileges;
 import com.warehouse.app.dto.request.RequestSignIn;
 import com.warehouse.app.dto.response.ResponseAccountData;
 import com.warehouse.app.dto.response.ResponseSignIn;
 import com.warehouse.app.entities.Account;
+import com.warehouse.app.entities.Privilege;
 import com.warehouse.app.entities.Role;
+import com.warehouse.app.entities.RolePrivileges;
 import com.warehouse.app.enums.AccountRoleEnum;
+import com.warehouse.app.enums.PrivilegeEnum;
 import com.warehouse.app.exception.BadRequestException;
 import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.exception.SystemErrorException;
 import com.warehouse.app.repositories.AccountRepository;
+import com.warehouse.app.repositories.PrivilegeRepository;
+import com.warehouse.app.repositories.RolePrivilegeRepository;
 import com.warehouse.app.repositories.RoleRepository;
 import com.warehouse.app.services.AuthService;
 import com.warehouse.app.services.JwtService;
 import com.warehouse.app.utilities.EntityUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,7 +32,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.warehouse.app.utilities.UtilsHelper.generateAvatar;
 import static com.warehouse.app.utilities.UtilsHelper.getMessage;
@@ -39,6 +49,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RoleRepository roleRepository;
+    private final PrivilegeRepository privilegeRepository;
+    private final RolePrivilegeRepository rolePrivilegeRepository;
 
     @Override
     public String register(RequestCreateAccount requestCreateAccount) {
@@ -80,16 +92,53 @@ public class AuthServiceImpl implements AuthService {
         return buildSignIn(account, requestSignIn.getPassword());
     }
 
+    @Override
+    @Transactional
+    public String settingPrivileges(List<RequestSettingPrivileges> req) {
+        List<AccountRoleEnum> accountRoleEnums = req.stream().map(RequestSettingPrivileges::getRole).toList();
+        List<Role> roleList = roleRepository.findAllByName(accountRoleEnums);
+        if (roleList.size() != req.size()) {
+            throw new BadRequestException(getMessage("role.not.found"));
+        }
+        try {
+            List<RolePrivileges> rolePrivilegesList = new ArrayList<>();
+            for (RequestSettingPrivileges role : req) {
+                List<Privilege> findPrivilege = privilegeRepository.findAllByName(role.getPrivileges());
+                for (Privilege privilege : findPrivilege) {
+                    Role findRole = roleList.stream().filter(r -> r.getName() == role.getRole()).findFirst().orElseThrow(() -> new BadRequestException(getMessage("role.not.found")));
+                    RolePrivileges rolePrivileges = RolePrivileges.builder()
+                            .privilege(privilege)
+                            .role(findRole)
+                            .build();
+                    rolePrivilegesList.add(rolePrivileges);
+                }
+            }
+
+            rolePrivilegeRepository.deleteAll();
+            rolePrivilegeRepository.saveAll(rolePrivilegesList);
+
+            System.out.println(rolePrivilegesList);
+            return "SUCCESS";
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
     private ResponseSignIn buildSignIn(Account account, String password) {
         Authentication authentication;
+        List<PrivilegeEnum> privilegeList = new ArrayList<>();
         try {
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(account.getEmail(), password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String jwt = jwtService.generateToken(userDetails);
             ResponseAccountData accountData = buildAccountData(account);
+            for (Privilege privilege :account.getRole().getPrivileges() ){
+                privilegeList.add(privilege.getName());
+            }
             return ResponseSignIn.builder().accessToken(jwt)
                     .accountData(accountData)
+                    .privileges(privilegeList)
                     .build();
         } catch (BadCredentialsException e) {
             throw new BadRequestException(getMessage("failed.login"));

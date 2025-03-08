@@ -1,5 +1,4 @@
-package com.warehouse.app.dto.response;
-
+package com.warehouse.app.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -21,8 +20,7 @@ import java.util.List;
 @JsonSerialize
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class ResponseSignIn {
-    private String accessToken;
-    private ResponseAccountData accountData;
-    private List<PrivilegeEnum> privileges;
+public class RequestSettingPrivileges {
+    AccountRoleEnum role;
+    List<PrivilegeEnum> privileges;
 }
