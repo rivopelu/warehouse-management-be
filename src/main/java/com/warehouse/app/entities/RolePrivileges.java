@@ -1,12 +1,12 @@
 package com.warehouse.app.entities;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -14,21 +14,19 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "account_roles")
-public class AccountRoles {
+@Table(name = "role_privileges")
+public class RolePrivileges {
+
     @Id
     private String id;
-
-
-    @JoinColumn(name = "account_id")
-    @ManyToOne
-    private Account account;
-
-
 
     @JoinColumn(name = "role_id")
     @ManyToOne
     private Role role;
+
+    @JoinColumn(name = "privilege_id")
+    @ManyToOne
+    private Privilege privilege;
 
 
     @PrePersist
@@ -37,5 +35,4 @@ public class AccountRoles {
             this.id = UUID.randomUUID().toString();
         }
     }
-
 }
