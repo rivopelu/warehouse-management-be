@@ -1,6 +1,8 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.entities.Account;
+import com.warehouse.app.entities.Privilege;
+import com.warehouse.app.enums.PrivilegeEnum;
 import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.repositories.AccountRepository;
 import com.warehouse.app.services.JwtService;
@@ -15,13 +17,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static com.warehouse.app.constants.AuthConstant.HEADER_X_WHO;
+import static com.warehouse.app.constants.AuthConstant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -46,13 +46,25 @@ public class JwtServiceImpl implements JwtService {
 
     public String generateToken(UserDetails userDetails) {
 
-        Optional<Account> account = accountRepository.findByEmailAndActiveIsTrue(userDetails.getUsername());
-        if (account.isEmpty()) {
+        Optional<Account> findAccount = accountRepository.findByEmailAndActiveIsTrue(userDetails.getUsername());
+        if (findAccount.isEmpty()) {
             throw new NotFoundException("Account Not Found");
         }
+        Account account = findAccount.get();
+        List<PrivilegeEnum> privilegeEnumList = account.getRole()
+                .getPrivileges()
+                .stream()
+                .map(Privilege::getName)
+                .toList();
+        String privileges = privilegeEnumList.stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(","));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put(HEADER_X_WHO, account.get().getId());
+        claims.put(HEADER_X_WHO, account.getId());
+        claims.put(HEADER_X_ROLE, account.getRole().getName());
+        claims.put(HEADER_X_MAIL, account.getEmail());
+        claims.put(HEADER_X_PRIVILEGES, privileges);
         return generateToken(claims, userDetails);
     }
 
