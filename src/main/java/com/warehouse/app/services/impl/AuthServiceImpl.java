@@ -72,23 +72,20 @@ public class AuthServiceImpl implements AuthService {
                 .role(role)
                 .phoneNumber(requestCreateAccount.getPhoneNumber())
                 .build();
-       try {
-           String id = UUID.randomUUID().toString();
-           account.setId(id);
-           EntityUtils.created(account, id);
-           accountRepository.save(account);
-           return getMessage("success");
-       }catch (Exception e){
-           throw new SystemErrorException(e);
-       }
+        try {
+            String id = UUID.randomUUID().toString();
+            account.setId(id);
+            EntityUtils.created(account, id);
+            accountRepository.save(account);
+            return getMessage("success");
+        } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
     }
 
     @Override
     public ResponseSignIn signIn(RequestSignIn requestSignIn) {
-       Account account = accountRepository.findByEmailAndActiveIsTrue(requestSignIn.getEmail()).orElseThrow(() -> new BadRequestException(getMessage("failed.login")));
-       if (!account.getRole().getName().equals(AccountRoleEnum.ADMIN)) {
-           throw new BadRequestException(getMessage("failed.login"));
-       }
+        Account account = accountRepository.findByEmailAndActiveIsTrue(requestSignIn.getEmail()).orElseThrow(() -> new BadRequestException(getMessage("failed.login")));
         return buildSignIn(account, requestSignIn.getPassword());
     }
 
@@ -103,23 +100,31 @@ public class AuthServiceImpl implements AuthService {
         try {
             List<RolePrivileges> rolePrivilegesList = new ArrayList<>();
             for (RequestSettingPrivileges role : req) {
-                List<Privilege> findPrivilege = privilegeRepository.findAllByName(role.getPrivileges());
-                for (Privilege privilege : findPrivilege) {
+                if (role.getRole() != AccountRoleEnum.SUPER_ADMIN) {
                     Role findRole = roleList.stream().filter(r -> r.getName() == role.getRole()).findFirst().orElseThrow(() -> new BadRequestException(getMessage("role.not.found")));
-                    RolePrivileges rolePrivileges = RolePrivileges.builder()
-                            .privilege(privilege)
-                            .role(findRole)
-                            .build();
-                    rolePrivilegesList.add(rolePrivileges);
+                    List<Privilege> findPrivilege = privilegeRepository.findAllByName(role.getPrivileges());
+                    for (Privilege privilege : findPrivilege) {
+                        RolePrivileges rolePrivileges = RolePrivileges.builder()
+                                .privilege(privilege)
+                                .role(findRole)
+                                .build();
+                        rolePrivilegesList.add(rolePrivileges);
+                    }
                 }
             }
-
+            Role findRoleSuperAdmin = roleRepository.findByName(AccountRoleEnum.SUPER_ADMIN).orElseThrow(() -> new NotFoundException(getMessage("role.not.found")));
+            List<Privilege> privilegeList = privilegeRepository.findAll();
+            for (Privilege privilege : privilegeList) {
+                RolePrivileges rolePrivileges = RolePrivileges.builder()
+                        .privilege(privilege)
+                        .role(findRoleSuperAdmin)
+                        .build();
+                rolePrivilegesList.add(rolePrivileges);
+            }
             rolePrivilegeRepository.deleteAll();
             rolePrivilegeRepository.saveAll(rolePrivilegesList);
-
-            System.out.println(rolePrivilegesList);
             return "SUCCESS";
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
@@ -133,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String jwt = jwtService.generateToken(userDetails);
             ResponseAccountData accountData = buildAccountData(account);
-            for (Privilege privilege :account.getRole().getPrivileges() ){
+            for (Privilege privilege : account.getRole().getPrivileges()) {
                 privilegeList.add(privilege.getName());
             }
             return ResponseSignIn.builder().accessToken(jwt)
