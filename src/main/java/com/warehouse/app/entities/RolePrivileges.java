@@ -35,4 +35,6 @@ public class RolePrivileges {
             this.id = UUID.randomUUID().toString();
         }
     }
+
+
 }

@@ -39,7 +39,7 @@ public class Account extends BaseEntity implements UserDetails {
     private String profilePicture;
 
 
-    @JoinColumn(name = "role")
+    @JoinColumn(name = "role_id")
     @ManyToOne
     private Role role;
 
