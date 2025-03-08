@@ -56,15 +56,13 @@ public class JwtServiceImpl implements JwtService {
                 .stream()
                 .map(Privilege::getName)
                 .toList();
-        String privileges = privilegeEnumList.stream()
-                .map(Enum::name)
-                .collect(Collectors.joining(","));
+
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(HEADER_X_WHO, account.getId());
         claims.put(HEADER_X_ROLE, account.getRole().getName());
         claims.put(HEADER_X_MAIL, account.getEmail());
-        claims.put(HEADER_X_PRIVILEGES, privileges);
+        claims.put(HEADER_X_PRIVILEGES, privilegeEnumList);
         return generateToken(claims, userDetails);
     }
 

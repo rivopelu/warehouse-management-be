@@ -5,4 +5,5 @@ public enum PrivilegeEnum {
     EDIT_WAREHOUSE,
     DELETE_WAREHOUSE,
     DETAIL_WAREHOUSE,
+    LIST_WAREHOUSE,
 }

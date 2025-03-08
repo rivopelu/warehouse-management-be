@@ -1,8 +1,13 @@
 package com.warehouse.app.utilities;
 
 import com.warehouse.app.entities.Privilege;
+import com.warehouse.app.entities.Role;
+import com.warehouse.app.entities.RolePrivileges;
+import com.warehouse.app.enums.AccountRoleEnum;
 import com.warehouse.app.enums.PrivilegeEnum;
 import com.warehouse.app.repositories.PrivilegeRepository;
+import com.warehouse.app.repositories.RolePrivilegeRepository;
+import com.warehouse.app.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +21,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
+    private final RoleRepository roleRepository;
+    private final RolePrivilegeRepository rolePrivilegeRepository;
     boolean alreadySetup = false;
-
 
 
     private final PrivilegeRepository privilegeRepository;
@@ -43,7 +49,16 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
             Privilege privilege = Privilege.builder()
                     .name(name)
                     .build();
-            privilegeRepository.save(privilege);
+            Privilege PrivilegeSaved = privilegeRepository.save(privilege);
+            Role findRole = roleRepository.findByName(AccountRoleEnum.SUPER_ADMIN).orElse(null);
+            if (findRole == null) {
+                throw new IllegalStateException("Role not found");
+            }
+            RolePrivileges rolePrivileges = RolePrivileges.builder()
+                    .role(findRole)
+                    .privilege(PrivilegeSaved)
+                    .build();
+            rolePrivilegeRepository.save(rolePrivileges);
         }
     }
 
