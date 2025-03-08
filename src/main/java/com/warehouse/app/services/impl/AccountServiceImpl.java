@@ -37,7 +37,7 @@ public class AccountServiceImpl implements AccountService {
                     .id(account.getId())
                     .email(account.getEmail())
                     .phoneNumber(account.getPhoneNumber())
-                    .role(account.getRole())
+                    .role(account.getRole().getName())
                     .profilePicture(account.getProfilePicture())
                     .name(account.getName())
                     .build();

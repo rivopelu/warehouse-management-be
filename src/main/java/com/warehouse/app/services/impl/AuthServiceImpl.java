@@ -52,7 +52,6 @@ public class AuthServiceImpl implements AuthService {
                 .password(encodedPassword)
                 .profilePicture(profilePicture)
                 .phoneNumber(requestCreateAccount.getPhoneNumber())
-                .role(AccountRoleEnum.ADMIN)
                 .build();
        try {
            String id = UUID.randomUUID().toString();
@@ -98,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(account.getEmail())
                 .phoneNumber(account.getPhoneNumber())
                 .name(account.getName())
-                .role(account.getRole())
+                .role(account.getRole().getName())
                 .profilePicture(account.getProfilePicture())
                 .build();
     }

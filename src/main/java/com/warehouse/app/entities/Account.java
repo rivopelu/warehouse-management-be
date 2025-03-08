@@ -9,7 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -32,17 +34,19 @@ public class Account extends BaseEntity implements UserDetails {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "role")
-    @Enumerated(EnumType.STRING)
-    private AccountRoleEnum role;
 
     @Column(name = "profile_picture")
     private String profilePicture;
 
 
+    @JoinColumn(name = "role")
+    @ManyToOne
+    private Role role;
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return Collections.singleton(new SimpleGrantedAuthority(role.getName().name()));
     }
 
     @Override
