@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1.3.0" author="rivopelu">
+        <createTable tableName="role">
+            <column name="id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <sql>
+            INSERT INTO `role` (`id`, `name`)
+            values ('05d11fb3-93cc-484a-a1a9-f4cfb0e65049', 'SUPER_ADMIN'),
+                   ('6aadc068-6ea3-4ae3-ac3d-bc668b7249dd', 'ADMIN')
+        </sql>
+    </changeSet>
+</databaseChangeLog>
