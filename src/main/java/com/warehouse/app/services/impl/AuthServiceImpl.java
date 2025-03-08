@@ -5,10 +5,13 @@ import com.warehouse.app.dto.request.RequestSignIn;
 import com.warehouse.app.dto.response.ResponseAccountData;
 import com.warehouse.app.dto.response.ResponseSignIn;
 import com.warehouse.app.entities.Account;
+import com.warehouse.app.entities.Role;
 import com.warehouse.app.enums.AccountRoleEnum;
 import com.warehouse.app.exception.BadRequestException;
+import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.exception.SystemErrorException;
 import com.warehouse.app.repositories.AccountRepository;
+import com.warehouse.app.repositories.RoleRepository;
 import com.warehouse.app.services.AuthService;
 import com.warehouse.app.services.JwtService;
 import com.warehouse.app.utilities.EntityUtils;
@@ -35,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final AccountRepository accountRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RoleRepository roleRepository;
 
     @Override
     public String register(RequestCreateAccount requestCreateAccount) {
@@ -44,6 +48,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException(getMessage("existed.email"));
         }
 
+        Role role = roleRepository.findByName(AccountRoleEnum.ADMIN).orElseThrow(() -> new NotFoundException(getMessage("role.not.found")));
+
         String profilePicture = generateAvatar(requestCreateAccount.getName());
         String encodedPassword = passwordEncoder.encode(requestCreateAccount.getPassword());
         Account account = Account.builder()
@@ -51,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(requestCreateAccount.getEmail())
                 .password(encodedPassword)
                 .profilePicture(profilePicture)
+                .role(role)
                 .phoneNumber(requestCreateAccount.getPhoneNumber())
                 .build();
        try {
@@ -67,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseSignIn signIn(RequestSignIn requestSignIn) {
        Account account = accountRepository.findByEmailAndActiveIsTrue(requestSignIn.getEmail()).orElseThrow(() -> new BadRequestException(getMessage("failed.login")));
-       if (!account.getRole().equals(AccountRoleEnum.ADMIN)) {
+       if (!account.getRole().getName().equals(AccountRoleEnum.ADMIN)) {
            throw new BadRequestException(getMessage("failed.login"));
        }
         return buildSignIn(account, requestSignIn.getPassword());
