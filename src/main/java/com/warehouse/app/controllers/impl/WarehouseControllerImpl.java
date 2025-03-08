@@ -7,6 +7,7 @@ import com.warehouse.app.dto.response.BaseResponse;
 import com.warehouse.app.services.WarehouseService;
 import com.warehouse.app.utilities.ResponseHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 
 @BaseControllerImpl
 @RequiredArgsConstructor
@@ -22,5 +23,10 @@ public class WarehouseControllerImpl implements WarehouseController {
     @Override
     public BaseResponse editWarehouse(RequestCreateWarehouse req, String id) {
         return ResponseHelper.createBaseResponse(warehouseService.editWarehouse(req, id));
+    }
+
+    @Override
+    public BaseResponse listWarehouse(Pageable pageable) {
+       return ResponseHelper.createBaseResponse(warehouseService.listWarehouse(pageable));
     }
 }

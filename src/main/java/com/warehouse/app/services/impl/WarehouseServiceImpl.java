@@ -1,6 +1,7 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateWarehouse;
+import com.warehouse.app.dto.response.ResponseListWarehouse;
 import com.warehouse.app.entities.SubDistrict;
 import com.warehouse.app.entities.Warehouse;
 import com.warehouse.app.exception.NotFoundException;
@@ -12,7 +13,11 @@ import com.warehouse.app.services.WarehouseService;
 import com.warehouse.app.utilities.EntityUtils;
 import com.warehouse.app.utilities.UtilsHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.warehouse.app.utilities.UtilsHelper.getMessage;
 
@@ -52,6 +57,26 @@ public class WarehouseServiceImpl implements WarehouseService {
             EntityUtils.updated(warehouse, accountService.getCurrentAccountId());
             warehouseRepository.save(warehouse);
             return getMessage("warehouse.updated");
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public Page<ResponseListWarehouse> listWarehouse(Pageable pageable) {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "updatedDate"));
+        Page<Warehouse> warehousePage = warehouseRepository.findAll(pageRequest);
+        List<ResponseListWarehouse> responseListWarehouses = new ArrayList<>();
+        try {
+            for (Warehouse warehouse : warehousePage.getContent()) {
+                ResponseListWarehouse responseListWarehouse = ResponseListWarehouse.builder()
+                        .name(warehouse.getName())
+                        .createdDate(warehouse.getCreatedDate())
+                        .address(warehouse.getAddress())
+                        .build();
+                responseListWarehouses.add(responseListWarehouse);
+            }
+            return new PageImpl<>(responseListWarehouses, pageable, warehousePage.getTotalElements());
         }catch (Exception e){
             throw new SystemErrorException(e);
         }
