@@ -4,6 +4,7 @@ import com.warehouse.app.dto.request.RequestCreateAccount;
 import com.warehouse.app.dto.request.RequestSettingPrivileges;
 import com.warehouse.app.dto.request.RequestSignIn;
 import com.warehouse.app.dto.response.ResponseAccountData;
+import com.warehouse.app.dto.response.ResponseRolePrivileges;
 import com.warehouse.app.dto.response.ResponseSignIn;
 import com.warehouse.app.entities.Account;
 import com.warehouse.app.entities.Privilege;
@@ -35,7 +36,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.warehouse.app.utilities.UtilsHelper.generateAvatar;
 import static com.warehouse.app.utilities.UtilsHelper.getMessage;
@@ -125,6 +125,37 @@ public class AuthServiceImpl implements AuthService {
             rolePrivilegeRepository.saveAll(rolePrivilegesList);
             return "SUCCESS";
         } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public List<PrivilegeEnum> getListPrivileges() {
+        try {
+            return List.of(PrivilegeEnum.values());
+        } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public List<ResponseRolePrivileges> getRolePrivileges() {
+        List<Role> roleList = roleRepository.findAllNotIn(AccountRoleEnum.SUPER_ADMIN);
+        List<ResponseRolePrivileges> rolePrivilegesList = new ArrayList<>();
+        try {
+            for (Role role : roleList) {
+                List<PrivilegeEnum> privilegeEnumList = new ArrayList<>();
+                for (Privilege privilege : role.getPrivileges()) {
+                    privilegeEnumList.add(privilege.getName());
+                }
+                ResponseRolePrivileges rolePrivileges = ResponseRolePrivileges.builder()
+                        .role(role.getName())
+                        .privileges(privilegeEnumList)
+                        .build();
+                rolePrivilegesList.add(rolePrivileges);
+            }
+            return rolePrivilegesList;
+        }catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }

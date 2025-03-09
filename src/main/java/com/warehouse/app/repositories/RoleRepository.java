@@ -14,4 +14,7 @@ public interface RoleRepository extends JpaRepository<Role, String> {
 
     @Query("SELECT r FROM Role r WHERE r.name IN :names")
     List<Role> findAllByName(@Param("names") List<AccountRoleEnum> names);
+
+    @Query("select  r from Role as r where  r.name not in :role")
+    List<Role> findAllNotIn(AccountRoleEnum role);
 }

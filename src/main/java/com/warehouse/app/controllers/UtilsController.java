@@ -4,6 +4,7 @@ import com.warehouse.app.annotations.BaseController;
 import com.warehouse.app.annotations.PublicAccess;
 import com.warehouse.app.dto.request.RequestSettingPrivileges;
 import com.warehouse.app.dto.response.BaseResponse;
+import com.warehouse.app.entities.RolePrivileges;
 import com.warehouse.app.enums.PrivilegeEnum;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,4 +35,10 @@ public interface UtilsController {
 
     @PutMapping("setting/privilege")
     BaseResponse settingPrivileges(@RequestBody List<RequestSettingPrivileges> req);
+
+    @GetMapping("v1/role-privilege")
+    BaseResponse getRolePrivileges();
+
+    @GetMapping("v1/list-privileges")
+    BaseResponse getListPrivileges();
 }

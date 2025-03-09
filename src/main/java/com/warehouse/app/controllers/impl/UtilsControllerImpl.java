@@ -49,4 +49,14 @@ public class UtilsControllerImpl implements UtilsController {
 
         return ResponseHelper.createBaseResponse(authService.settingPrivileges(req));
     }
+
+    @Override
+    public BaseResponse getRolePrivileges() {
+        return ResponseHelper.createBaseResponse(authService.getRolePrivileges());
+    }
+
+    @Override
+    public BaseResponse getListPrivileges() {
+        return ResponseHelper.createBaseResponse(authService.getListPrivileges());
+    }
 }
