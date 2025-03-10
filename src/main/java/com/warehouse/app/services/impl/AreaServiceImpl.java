@@ -1,10 +1,12 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.response.ResponseAreaData;
+import com.warehouse.app.dto.response.ResponseFullArea;
 import com.warehouse.app.entities.City;
 import com.warehouse.app.entities.District;
 import com.warehouse.app.entities.Province;
 import com.warehouse.app.entities.SubDistrict;
+import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.exception.SystemErrorException;
 import com.warehouse.app.repositories.CityRepository;
 import com.warehouse.app.repositories.DistrictRepository;
@@ -66,8 +68,10 @@ public class AreaServiceImpl implements AreaService {
 
     @Override
     public List<ResponseAreaData> getDistrictList(BigInteger cityId) {
+
         List<District> districtList = districtRepository.findByCityId(cityId);
         List<ResponseAreaData> responseAreaDataList = new ArrayList<>();
+
         try {
             for (District district : districtList) {
                 ResponseAreaData res = ResponseAreaData.builder()
@@ -84,8 +88,10 @@ public class AreaServiceImpl implements AreaService {
 
     @Override
     public List<ResponseAreaData> getSubDistrictList(BigInteger districtId) {
+
         List<SubDistrict> subDistrictList = subDistrictRepository.findByDistrictId(districtId);
         List<ResponseAreaData> responseAreaDataList = new ArrayList<>();
+
         try {
             for (SubDistrict subDistrict : subDistrictList) {
                 ResponseAreaData responseAreaData = ResponseAreaData.builder()
@@ -96,6 +102,17 @@ public class AreaServiceImpl implements AreaService {
             }
             return responseAreaDataList;
         } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public ResponseFullArea findAreaBySubDistrictId(BigInteger subDistrictId) {
+        SubDistrict subDistrict = subDistrictRepository.findById(subDistrictId).orElseThrow(() -> new NotFoundException("not.found.subdistrict"));
+        try {
+            return ResponseFullArea.builder()
+                    .build();
+        }catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }

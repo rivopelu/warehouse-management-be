@@ -1,0 +1,32 @@
+package com.warehouse.app.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigInteger;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonSerialize
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+public class ResponseDetailWarehouse {
+    private String name;
+    private String address;
+    private BigInteger provinceId;
+    private String provinceName;
+    private BigInteger cityId;
+    private String cityName;
+    private BigInteger districtId;
+    private String districtName;
+    private BigInteger subDistrictId;
+    private String subDistrictName;
+}

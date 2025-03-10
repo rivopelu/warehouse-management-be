@@ -1,6 +1,7 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateWarehouse;
+import com.warehouse.app.dto.response.ResponseDetailWarehouse;
 import com.warehouse.app.dto.response.ResponseListWarehouse;
 import com.warehouse.app.entities.SubDistrict;
 import com.warehouse.app.entities.Warehouse;
@@ -57,7 +58,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             EntityUtils.updated(warehouse, accountService.getCurrentAccountId());
             warehouseRepository.save(warehouse);
             return getMessage("warehouse.updated");
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
@@ -77,7 +78,18 @@ public class WarehouseServiceImpl implements WarehouseService {
                 responseListWarehouses.add(responseListWarehouse);
             }
             return new PageImpl<>(responseListWarehouses, pageable, warehousePage.getTotalElements());
-        }catch (Exception e){
+        } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public ResponseDetailWarehouse detailWarehouse(String id) {
+        Warehouse warehouse = warehouseRepository.findByIdAndActiveIsTrue(id).orElseThrow(() -> new NotFoundException(getMessage("warehouse.not.found")));
+
+        try {
+            return null;
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
