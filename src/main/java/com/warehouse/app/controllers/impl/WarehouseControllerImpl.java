@@ -29,4 +29,9 @@ public class WarehouseControllerImpl implements WarehouseController {
     public BaseResponse listWarehouse(Pageable pageable) {
        return ResponseHelper.createBaseResponse(warehouseService.listWarehouse(pageable));
     }
+
+    @Override
+    public BaseResponse detailWarehouse(String id) {
+        return ResponseHelper.createBaseResponse(warehouseService.detailWarehouse(id));
+    }
 }

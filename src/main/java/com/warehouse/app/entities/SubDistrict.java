@@ -1,10 +1,7 @@
 package com.warehouse.app.entities;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,11 +19,13 @@ public class SubDistrict {
     @Id
     private BigInteger id;
 
-    @Column(name = "district_id")
-    private BigInteger districtId;
+    @JoinColumn(name = "district_id")
+    @ManyToOne
+    private District district;
 
-    @Column(name = "city_id")
-    private BigInteger cityId;
+    @JoinColumn(name = "city_id")
+    @ManyToOne
+    private City city;
 
     @Column(name = "province_id")
     private BigInteger provinceId;
