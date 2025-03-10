@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ResponseListWarehouse {
-
+    private String id;
     private String name;
     private Long createdDate;
     private String address;

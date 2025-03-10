@@ -20,6 +20,7 @@ import java.math.BigInteger;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class ResponseDetailWarehouse {
     private String name;
+    private String id;
     private String address;
     private BigInteger provinceId;
     private String provinceName;

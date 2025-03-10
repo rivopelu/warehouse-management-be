@@ -75,6 +75,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             for (Warehouse warehouse : warehousePage.getContent()) {
                 ResponseListWarehouse responseListWarehouse = ResponseListWarehouse.builder()
                         .name(warehouse.getName())
+                        .id(warehouse.getId())
                         .createdDate(warehouse.getCreatedDate())
                         .address(warehouse.getAddress())
                         .build();
@@ -93,6 +94,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
         try {
             return ResponseDetailWarehouse.builder()
+                    .id(warehouse.getId())
                     .cityId(area.getCity().getId())
                     .cityName(area.getCity().getName())
                     .districtId(area.getDistrict().getId())
