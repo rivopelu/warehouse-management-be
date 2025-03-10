@@ -19,7 +19,7 @@ public interface WarehouseController {
     @GetMapping("v1/list")
     BaseResponse listWarehouse(Pageable pageable);
 
-    @GetMapping("v1/detail{id}")
+    @GetMapping("v1/detail/{id}")
     BaseResponse detailWarehouse(@PathVariable("id") String id);
 
 }

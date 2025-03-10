@@ -27,9 +27,8 @@ public class SubDistrict {
     @ManyToOne
     private City city;
 
-    @JoinColumn(name = "province_id")
-    @ManyToOne
-    private Province province;
+    @Column(name = "province_id")
+    private BigInteger provinceId;
 
     @Column(name = "name")
     private String name;

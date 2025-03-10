@@ -109,8 +109,17 @@ public class AreaServiceImpl implements AreaService {
     @Override
     public ResponseFullArea findAreaBySubDistrictId(BigInteger subDistrictId) {
         SubDistrict subDistrict = subDistrictRepository.findById(subDistrictId).orElseThrow(() -> new NotFoundException("not.found.subdistrict"));
+        ResponseAreaData city = ResponseAreaData.builder().name(subDistrict.getCity().getName()).id(subDistrict.getCity().getId()).build();
+        ResponseAreaData district = ResponseAreaData.builder().name(subDistrict.getDistrict().getName()).id(subDistrict.getDistrict().getId()).build();
+        ResponseAreaData subDistrictData = ResponseAreaData.builder().name(subDistrict.getName()).id(subDistrict.getId()).build();
+        Province province = provinceRepository.findById(subDistrict.getProvinceId()).orElseThrow(() -> new NotFoundException("not.found.province"));
+        ResponseAreaData provinceData = ResponseAreaData.builder().name(province.getName()).id(province.getId()).build();
         try {
             return ResponseFullArea.builder()
+                    .city(city)
+                    .district(district)
+                    .subDistrict(subDistrictData)
+                    .province(provinceData)
                     .build();
         }catch (Exception e) {
             throw new SystemErrorException(e);
