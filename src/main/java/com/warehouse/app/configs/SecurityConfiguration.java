@@ -32,8 +32,8 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
 
-
         String[] finalWhiteList = publicApiScanner.getPublicUrls().toArray(new String[0]);
+
         http
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session

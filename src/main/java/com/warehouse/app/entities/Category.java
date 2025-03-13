@@ -22,6 +22,9 @@ public class Category {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "slug")
+    private String slug;
+
     @PrePersist
     public void prePersist() {
         if (this.id == null) {
