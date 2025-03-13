@@ -1,13 +1,12 @@
 package com.warehouse.app.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Data
 @Entity
@@ -16,9 +15,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "category")
 public class Category {
+
     @Id
     private String id;
 
     @Column(name = "name")
     private String name;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID().toString();
+        }
+    }
+
 }
