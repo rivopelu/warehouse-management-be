@@ -7,4 +7,5 @@ public enum PrivilegeEnum {
     DETAIL_WAREHOUSE,
     LIST_WAREHOUSE,
     SETTING_PRIVILEGE,
+    CREATE_CATEGORY,
 }
