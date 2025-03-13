@@ -24,4 +24,14 @@ public class UtilsHelper {
         return messageSource.getMessage(key, null, Locale.ENGLISH);
     }
 
+
+    public static String generateUniqueSlug(String e) {
+        String slug = e.replaceAll("[^a-zA-Z0-9\\s]", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+        slug = slug.toLowerCase();
+        slug = slug.replaceAll("\\s", "-");
+        return slug;
+    }
+
 }
