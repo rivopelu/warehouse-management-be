@@ -49,4 +49,10 @@ public class MasterDataServiceImpl implements MasterDataService {
             throw new SystemErrorException(e);
         }
     }
+
+    @Override
+     public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
+    }
+
 }

@@ -17,4 +17,9 @@ public class MasterDataControllerImpl implements MasterDataController {
     public BaseResponse createNewCategory(RequestCreateCategory requestCreateCategory) {
         return ResponseHelper.createBaseResponse(masterDataService.createNewCategory(requestCreateCategory));
     }
+
+    @Override
+    public BaseResponse getAllCategories() {
+        return ResponseHelper.createBaseResponse(masterDataService.getAllCategories());
+    }
 }
