@@ -23,4 +23,8 @@
         <include file="/db/changelog/1.3.7_add_fk_sub_district_and_city.xml"/>
         <include file="/db/changelog/1.4.0_add_table_category.xml"/>
         <include file="/db/changelog/1.4.1_add_column_slug_in_category.xml"/>
+        <include file="/db/changelog/1.4.2_add_table_product.xml"/>
+        <include file="/db/changelog/1.4.3_add_table_variant_product.xml"/>
+        <include file="/db/changelog/1.4.4_add_table_unit_type.xml"/>
+        <include file="/db/changelog/1.4.5_add_table_product_variant_unit.xml"/>
 </databaseChangeLog>
