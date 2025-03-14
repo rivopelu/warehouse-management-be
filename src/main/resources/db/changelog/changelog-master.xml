@@ -24,4 +24,5 @@
         <include file="/db/changelog/1.4.0_add_table_category.xml"/>
         <include file="/db/changelog/1.4.1_add_column_slug_in_category.xml"/>
         <include file="/db/changelog/1.4.2_add_table_product.xml"/>
+        <include file="/db/changelog/1.4.3_add_table_variant_product.xml"/>
 </databaseChangeLog>
