@@ -30,4 +30,7 @@ public interface MasterDataController {
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "category", required = false) String categoryId
     );
+
+    @GetMapping("v1/product/detail/{id}")
+    BaseResponse getDetailProduct(@PathVariable("id") String id);
 }

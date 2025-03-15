@@ -125,6 +125,16 @@ public class MasterDataServiceImpl implements MasterDataService {
         }
     }
 
+    @Override
+    public ResponseDetailProduct getDetailProduct(String id) {
+        Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundException("Product not found"));
+        try {
+            return buildDetailProduct(product);
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
     private List<ResponseListProduct> buildListProducts(List<Product> products) {
         List<ResponseListProduct> responseListProducts = new ArrayList<>();
         for (Product product : products) {

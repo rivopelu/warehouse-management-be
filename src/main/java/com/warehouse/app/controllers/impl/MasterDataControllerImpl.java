@@ -40,4 +40,9 @@ public class MasterDataControllerImpl implements MasterDataController {
     public BaseResponse getListProducts(Pageable pageable, String keyword, String categoryId) {
         return ResponseHelper.createBaseResponse(masterDataService.getListProducts(pageable, keyword, categoryId));
     }
+
+    @Override
+    public BaseResponse getDetailProduct(String id) {
+        return ResponseHelper.createBaseResponse(masterDataService.getDetailProduct(id));
+    }
 }

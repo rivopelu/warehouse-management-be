@@ -22,4 +22,6 @@ public interface MasterDataService {
     ResponseDetailProduct editProduct(String id, RequestCreateProduct requestCreateProduct);
 
     Page<ResponseListProduct> getListProducts(Pageable pageable, String keyword, String categoryId);
+
+    ResponseDetailProduct getDetailProduct(String id);
 }
