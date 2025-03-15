@@ -1,15 +1,23 @@
 package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateCategory;
+import com.warehouse.app.dto.request.RequestCreateProduct;
+import com.warehouse.app.dto.response.ResponseDetailProduct;
+import com.warehouse.app.dto.response.ResponseListProduct;
 import com.warehouse.app.entities.Category;
+import com.warehouse.app.entities.Product;
 import com.warehouse.app.exception.BadRequestException;
+import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.exception.SystemErrorException;
 import com.warehouse.app.repositories.CategoryRepository;
+import com.warehouse.app.repositories.ProductRepository;
+import com.warehouse.app.services.AccountService;
 import com.warehouse.app.services.MasterDataService;
+import com.warehouse.app.utilities.EntityUtils;
 import com.warehouse.app.utilities.UtilsHelper;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,9 +25,13 @@ import java.util.Optional;
 @Service
 public class MasterDataServiceImpl implements MasterDataService {
     private final CategoryRepository categoryRepository;
+    private final AccountService accountService;
+    private final ProductRepository productRepository;
 
-    public MasterDataServiceImpl(CategoryRepository categoryRepository) {
+    public MasterDataServiceImpl(CategoryRepository categoryRepository, AccountService accountService, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.accountService = accountService;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -53,6 +65,90 @@ public class MasterDataServiceImpl implements MasterDataService {
     @Override
      public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+    }
+
+    @Override
+    public ResponseDetailProduct createProduct(RequestCreateProduct requestCreateProduct) {
+        Category category = categoryRepository.findById(requestCreateProduct.getCategoryId()).orElseThrow(() -> new NotFoundException(UtilsHelper.getMessage("not.found.category")));
+        String slug = UtilsHelper.generateUniqueSlug(requestCreateProduct.getName());
+        boolean checkExistedProduct = productRepository.existsBySlugAndActiveIsTrue(slug);
+        if (checkExistedProduct) {
+            throw new BadRequestException("Product with name " + requestCreateProduct.getName() + " already exists");
+        }
+        Product product  = Product.builder()
+                .name(requestCreateProduct.getName())
+                .slug(slug)
+                .category(category)
+                .imageUrl(requestCreateProduct.getImageUrl())
+                .build();
+        EntityUtils.created(product, accountService.getCurrentAccountId());
+        try {
+            productRepository.save(product);
+            return  buildDetailProduct(product);
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public ResponseDetailProduct editProduct(String id, RequestCreateProduct requestCreateProduct) {
+        String slug = UtilsHelper.generateUniqueSlug(requestCreateProduct.getName());
+        Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundException("Product not found"));
+        if (!product.getSlug().equals(slug)) {
+            boolean checkExistedProduct = productRepository.existsBySlugAndActiveIsTrue(slug);
+            if (checkExistedProduct) {
+                throw new BadRequestException("Product with name " + requestCreateProduct.getName() + " already exists");
+            }
+        }
+
+        product.setName(requestCreateProduct.getName());
+        product.setCategory(categoryRepository.findById(requestCreateProduct.getCategoryId()).orElseThrow(() -> new NotFoundException("Category not found")));
+        product.setImageUrl(requestCreateProduct.getImageUrl());
+        EntityUtils.updated(product, accountService.getCurrentAccountId());
+        try {
+            productRepository.save(product);
+            return buildDetailProduct(product);
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public Page<ResponseListProduct> getListProducts(Pageable pageable, String keyword, String categoryId) {
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.Direction.DESC, "createdDate");
+        Page<Product> productPage = productRepository.findListAndFilter(pageRequest, keyword, categoryId);
+        List<ResponseListProduct> productsList = buildListProducts(productPage.getContent());
+        try {
+            return new PageImpl<>(productsList, pageable, productPage.getTotalElements());
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
+    private List<ResponseListProduct> buildListProducts(List<Product> products) {
+        List<ResponseListProduct> responseListProducts = new ArrayList<>();
+        for (Product product : products) {
+            ResponseListProduct responseListProduct = ResponseListProduct.builder()
+                    .id(product.getId())
+                    .name(product.getName())
+                    .slug(product.getSlug())
+                    .imageUrl(product.getImageUrl())
+                    .categoryId(product.getCategory().getId())
+                    .categoryName(product.getCategory().getName())
+                    .build();
+            responseListProducts.add(responseListProduct);
+        }
+        return responseListProducts;
+    }
+
+    private ResponseDetailProduct buildDetailProduct(Product product){
+        return ResponseDetailProduct.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .imageUrl(product.getImageUrl())
+                .categoryId(product.getCategory().getId())
+                .categoryName(product.getCategory().getName())
+                .build();
     }
 
 }
