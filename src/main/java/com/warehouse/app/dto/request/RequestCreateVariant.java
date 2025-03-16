@@ -37,7 +37,7 @@ public class RequestCreateVariant {
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     public static class Units {
         private UnitTypeEnum type;
-        private BigInteger value;
+        private Integer value;
         private UnitTypeEnum parent;
 
     }
