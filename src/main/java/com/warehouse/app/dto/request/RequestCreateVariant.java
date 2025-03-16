@@ -36,9 +36,9 @@ public class RequestCreateVariant {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     public static class Units {
-        private UnitTypeEnum type;
+        private String typeId;
         private Integer value;
-        private UnitTypeEnum parent;
+        private String parentId;
 
     }
 }

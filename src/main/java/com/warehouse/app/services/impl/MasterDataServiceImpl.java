@@ -166,8 +166,11 @@ public class MasterDataServiceImpl implements MasterDataService {
         try {
             List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
             for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
-                UnitType unit =  unitTypeRepository.findByName(units.getType()).orElseThrow(() -> new NotFoundException("Unit type not found"));
-                UnitType parentUnit =  unitTypeRepository.findByName(units.getParent()).orElseThrow(() -> new NotFoundException("Unit type not found"));
+                UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
+                UnitType parentUnit  = null;
+                if (units.getParentId() != null) {
+                   parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
+                }
                 ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
                         .unit(unit)
                         .parentUnit(parentUnit)
