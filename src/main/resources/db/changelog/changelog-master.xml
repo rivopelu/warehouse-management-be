@@ -27,4 +27,5 @@
         <include file="/db/changelog/1.4.3_add_table_variant_product.xml"/>
         <include file="/db/changelog/1.4.4_add_table_unit_type.xml"/>
         <include file="/db/changelog/1.4.5_add_table_product_variant_unit.xml"/>
+        <include file="/db/changelog/1.4.6_add_column_unique_code_varant.xml"/>
 </databaseChangeLog>

@@ -29,4 +29,7 @@ public class VariantProduct extends BaseEntity {
     @ManyToOne
     private Product product;
 
+    @Column(name = "unique_code")
+    private String uniqueCode;
+
 }
