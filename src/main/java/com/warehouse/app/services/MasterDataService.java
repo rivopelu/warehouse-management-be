@@ -2,6 +2,7 @@ package com.warehouse.app.services;
 
 import com.warehouse.app.dto.request.RequestCreateCategory;
 import com.warehouse.app.dto.request.RequestCreateProduct;
+import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.ResponseDetailProduct;
 import com.warehouse.app.dto.response.ResponseListProduct;
 import com.warehouse.app.entities.Category;
@@ -24,4 +25,6 @@ public interface MasterDataService {
     Page<ResponseListProduct> getListProducts(Pageable pageable, String keyword, String categoryId);
 
     ResponseDetailProduct getDetailProduct(String id);
+
+    String createVariant(RequestCreateVariant requestCreateVariant);
 }

@@ -3,6 +3,7 @@ package com.warehouse.app.controllers;
 import com.warehouse.app.annotations.BaseController;
 import com.warehouse.app.dto.request.RequestCreateCategory;
 import com.warehouse.app.dto.request.RequestCreateProduct;
+import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.BaseResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
@@ -33,4 +34,8 @@ public interface MasterDataController {
 
     @GetMapping("v1/product/detail/{id}")
     BaseResponse getDetailProduct(@PathVariable("id") String id);
+
+    @PostMapping("v1/product/variant/new")
+    BaseResponse createVariant(@RequestBody RequestCreateVariant requestCreateVariant);
+
 }

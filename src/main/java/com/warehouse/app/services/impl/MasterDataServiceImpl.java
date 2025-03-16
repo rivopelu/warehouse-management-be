@@ -2,15 +2,18 @@ package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateCategory;
 import com.warehouse.app.dto.request.RequestCreateProduct;
+import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.ResponseDetailProduct;
 import com.warehouse.app.dto.response.ResponseListProduct;
 import com.warehouse.app.entities.Category;
 import com.warehouse.app.entities.Product;
+import com.warehouse.app.entities.VariantProduct;
 import com.warehouse.app.exception.BadRequestException;
 import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.exception.SystemErrorException;
 import com.warehouse.app.repositories.CategoryRepository;
 import com.warehouse.app.repositories.ProductRepository;
+import com.warehouse.app.repositories.VariantProductRepository;
 import com.warehouse.app.services.AccountService;
 import com.warehouse.app.services.MasterDataService;
 import com.warehouse.app.utilities.EntityUtils;
@@ -18,6 +21,7 @@ import com.warehouse.app.utilities.UtilsHelper;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +31,13 @@ public class MasterDataServiceImpl implements MasterDataService {
     private final CategoryRepository categoryRepository;
     private final AccountService accountService;
     private final ProductRepository productRepository;
+    private final VariantProductRepository variantProductRepository;
 
-    public MasterDataServiceImpl(CategoryRepository categoryRepository, AccountService accountService, ProductRepository productRepository) {
+    public MasterDataServiceImpl(CategoryRepository categoryRepository, AccountService accountService, ProductRepository productRepository, VariantProductRepository variantProductRepository) {
         this.categoryRepository = categoryRepository;
         this.accountService = accountService;
         this.productRepository = productRepository;
+        this.variantProductRepository = variantProductRepository;
     }
 
     @Override
@@ -130,6 +136,26 @@ public class MasterDataServiceImpl implements MasterDataService {
         Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundException("Product not found"));
         try {
             return buildDetailProduct(product);
+        }catch (Exception e){
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public String createVariant(RequestCreateVariant requestCreateVariant) {
+        Product product = productRepository.findById(requestCreateVariant.getProductId()).orElseThrow(() -> new NotFoundException("Product not found"));
+        String slug = UtilsHelper.generateUniqueSlug(requestCreateVariant.getName());
+        Optional<VariantProduct> findVariant = variantProductRepository.findBySlugOrUniqueCodeAndActiveIsTrue(slug, requestCreateVariant.getUniqueCode());
+        if (findVariant.isPresent()) {
+            if (findVariant.get().getSlug().equals(slug)) {
+                throw new BadRequestException("Variant with name " + requestCreateVariant.getName() + " already exists");
+            }
+            if (findVariant.get().getUniqueCode().equals(requestCreateVariant.getUniqueCode())) {
+                throw new BadRequestException("unique code for " + requestCreateVariant.getName() + " already exists");
+            }
+        }
+        try {
+            return "";
         }catch (Exception e){
             throw new SystemErrorException(e);
         }
