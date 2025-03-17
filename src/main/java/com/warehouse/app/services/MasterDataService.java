@@ -5,6 +5,7 @@ import com.warehouse.app.dto.request.RequestCreateProduct;
 import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.ResponseDetailProduct;
 import com.warehouse.app.dto.response.ResponseListProduct;
+import com.warehouse.app.dto.response.ResponseListProductVariant;
 import com.warehouse.app.entities.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,4 +28,6 @@ public interface MasterDataService {
     ResponseDetailProduct getDetailProduct(String id);
 
     String createVariant(RequestCreateVariant requestCreateVariant);
+
+    List<ResponseListProductVariant> getListVariants(String id);
 }

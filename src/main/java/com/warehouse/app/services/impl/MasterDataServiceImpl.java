@@ -5,6 +5,7 @@ import com.warehouse.app.dto.request.RequestCreateProduct;
 import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.ResponseDetailProduct;
 import com.warehouse.app.dto.response.ResponseListProduct;
+import com.warehouse.app.dto.response.ResponseListProductVariant;
 import com.warehouse.app.entities.*;
 import com.warehouse.app.exception.BadRequestException;
 import com.warehouse.app.exception.NotFoundException;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -162,28 +164,80 @@ public class MasterDataServiceImpl implements MasterDataService {
                 .build();
         EntityUtils.created(buildVariantProduct, currentAccountId);
         VariantProduct variantProduct = variantProductRepository.save(buildVariantProduct);
-
-        try {
-            List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
-            for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
-                UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
-                UnitType parentUnit  = null;
-                if (units.getParentId() != null) {
-                   parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
-                }
-                ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
-                        .unit(unit)
-                        .parentUnit(parentUnit)
-                        .variantProduct(variantProduct)
-                        .quantity(units.getValue())
-                        .build();
-                EntityUtils.created(productVariantUnit, currentAccountId);
-                productVariantUnitList.add(productVariantUnit);
-
+        int idx = 0;
+        boolean isHasMainParent = false;
+        List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
+        for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
+            UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
+            UnitType parentUnit  = null;
+            if (units.getParentId() != null) {
+                parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
             }
+            if (units.getParentId() == null){
+                if (!isHasMainParent){
+                    isHasMainParent = true;
+                } else{
+                    throw new BadRequestException("Parent unit id "  + " is already exists");
+                }
+            }
+            Boolean isMainParent = parentUnit == null;
+            ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
+                    .unit(unit)
+                    .parentUnit(parentUnit)
+                    .variantProduct(variantProduct)
+                    .quantity(units.getValue())
+                    .count(idx)
+                    .isMainParent(isMainParent)
+                    .build();
+
+            EntityUtils.created(productVariantUnit, currentAccountId);
+            idx = idx + 1;
+            productVariantUnitList.add(productVariantUnit);
+        }
+        try {
+
             productVariantUnitRepository.saveAll(productVariantUnitList);
             return "success";
         } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public List<ResponseListProductVariant> getListVariants(String id) {
+        List<VariantProduct> variantProducts = variantProductRepository.findByProductId(id);
+        List<ResponseListProductVariant> responseListProductVariantList = new ArrayList<>();
+        try {
+
+            for (VariantProduct variantProduct : variantProducts) {
+
+                List<ResponseListProductVariant.Units> unitsList = new ArrayList<>();
+
+                for (ProductVariantUnit productVariantUnit : variantProduct.getVariantUnits()){
+                    ResponseListProductVariant.Units units = ResponseListProductVariant.Units.builder()
+                            .type(productVariantUnit.getUnit().getName())
+                            .parentType(productVariantUnit.getParentUnit() != null ? productVariantUnit.getParentUnit().getName() : null)
+                            .quantity(productVariantUnit.getQuantity())
+                            .isMainParent(productVariantUnit.getIsMainParent())
+                            .count(productVariantUnit.getCount())
+                            .build();
+                    unitsList.add(units);
+                }
+
+                unitsList.sort(Comparator.comparing(ResponseListProductVariant.Units::getCount));
+
+                ResponseListProductVariant responseListProductVariant = ResponseListProductVariant.builder()
+                        .name(variantProduct.getName())
+                        .id(variantProduct.getId())
+                        .uniqueCode(variantProduct.getUniqueCode())
+                        .imageUrl(variantProduct.getImageUrl())
+                        .description(variantProduct.getDescription())
+                        .units(unitsList)
+                        .build();
+                responseListProductVariantList.add(responseListProductVariant);
+            }
+            return  responseListProductVariantList;
+        }catch (Exception e){
             throw new SystemErrorException(e);
         }
     }
