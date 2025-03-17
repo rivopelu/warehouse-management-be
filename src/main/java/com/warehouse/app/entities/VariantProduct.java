@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Entity
 @Builder
@@ -31,5 +33,8 @@ public class VariantProduct extends BaseEntity {
 
     @Column(name = "unique_code")
     private String uniqueCode;
+
+    @OneToMany(mappedBy = "variantProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductVariantUnit> variantUnits;
 
 }

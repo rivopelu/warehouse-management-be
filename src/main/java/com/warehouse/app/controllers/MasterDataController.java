@@ -38,4 +38,6 @@ public interface MasterDataController {
     @PostMapping("v1/product/variant/new")
     BaseResponse createVariant(@RequestBody RequestCreateVariant requestCreateVariant);
 
+    @GetMapping("v1/product/variant/list/{id}")
+    BaseResponse getListVariants(@PathVariable("id") String id);
 }
