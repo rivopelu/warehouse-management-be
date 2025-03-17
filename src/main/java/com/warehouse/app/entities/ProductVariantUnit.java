@@ -28,4 +28,10 @@ public class ProductVariantUnit extends BaseEntity {
     @Column(name = "quantity")
     private Integer quantity;
 
+    @Column(name = "is_main_parent")
+    private Boolean isMainParent;
+
+    @Column(name = "count")
+    private Integer count;
+
 }

@@ -21,6 +21,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -163,7 +164,7 @@ public class MasterDataServiceImpl implements MasterDataService {
                 .build();
         EntityUtils.created(buildVariantProduct, currentAccountId);
         VariantProduct variantProduct = variantProductRepository.save(buildVariantProduct);
-
+        int idx = 0;
         try {
             List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
             for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
@@ -172,15 +173,19 @@ public class MasterDataServiceImpl implements MasterDataService {
                 if (units.getParentId() != null) {
                    parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
                 }
+                Boolean isMainParent = parentUnit == null;
                 ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
                         .unit(unit)
                         .parentUnit(parentUnit)
                         .variantProduct(variantProduct)
                         .quantity(units.getValue())
+                        .count(idx)
+                        .isMainParent(isMainParent)
                         .build();
-                EntityUtils.created(productVariantUnit, currentAccountId);
-                productVariantUnitList.add(productVariantUnit);
 
+                EntityUtils.created(productVariantUnit, currentAccountId);
+                idx = idx + 1;
+                productVariantUnitList.add(productVariantUnit);
             }
             productVariantUnitRepository.saveAll(productVariantUnitList);
             return "success";
@@ -204,9 +209,13 @@ public class MasterDataServiceImpl implements MasterDataService {
                             .type(productVariantUnit.getUnit().getName())
                             .parentType(productVariantUnit.getParentUnit() != null ? productVariantUnit.getParentUnit().getName() : null)
                             .quantity(productVariantUnit.getQuantity())
+                            .isMainParent(productVariantUnit.getIsMainParent())
+                            .count(productVariantUnit.getCount())
                             .build();
                     unitsList.add(units);
                 }
+
+                unitsList.sort(Comparator.comparing(ResponseListProductVariant.Units::getCount));
 
                 ResponseListProductVariant responseListProductVariant = ResponseListProductVariant.builder()
                         .name(variantProduct.getName())

@@ -40,5 +40,7 @@ public class ResponseListProductVariant {
         private UnitTypeEnum type;
         private Integer quantity;
         private UnitTypeEnum parentType;
+        private Boolean isMainParent;
+        private Integer count;
     }
 }
