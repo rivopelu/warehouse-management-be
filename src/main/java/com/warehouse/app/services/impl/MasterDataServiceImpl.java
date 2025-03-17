@@ -165,28 +165,37 @@ public class MasterDataServiceImpl implements MasterDataService {
         EntityUtils.created(buildVariantProduct, currentAccountId);
         VariantProduct variantProduct = variantProductRepository.save(buildVariantProduct);
         int idx = 0;
-        try {
-            List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
-            for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
-                UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
-                UnitType parentUnit  = null;
-                if (units.getParentId() != null) {
-                   parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
-                }
-                Boolean isMainParent = parentUnit == null;
-                ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
-                        .unit(unit)
-                        .parentUnit(parentUnit)
-                        .variantProduct(variantProduct)
-                        .quantity(units.getValue())
-                        .count(idx)
-                        .isMainParent(isMainParent)
-                        .build();
-
-                EntityUtils.created(productVariantUnit, currentAccountId);
-                idx = idx + 1;
-                productVariantUnitList.add(productVariantUnit);
+        boolean isHasMainParent = false;
+        List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
+        for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
+            UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
+            UnitType parentUnit  = null;
+            if (units.getParentId() != null) {
+                parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
             }
+            if (units.getParentId() == null){
+                if (!isHasMainParent){
+                    isHasMainParent = true;
+                } else{
+                    throw new BadRequestException("Parent unit id "  + " is already exists");
+                }
+            }
+            Boolean isMainParent = parentUnit == null;
+            ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
+                    .unit(unit)
+                    .parentUnit(parentUnit)
+                    .variantProduct(variantProduct)
+                    .quantity(units.getValue())
+                    .count(idx)
+                    .isMainParent(isMainParent)
+                    .build();
+
+            EntityUtils.created(productVariantUnit, currentAccountId);
+            idx = idx + 1;
+            productVariantUnitList.add(productVariantUnit);
+        }
+        try {
+
             productVariantUnitRepository.saveAll(productVariantUnitList);
             return "success";
         } catch (Exception e) {
