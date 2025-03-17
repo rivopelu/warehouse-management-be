@@ -5,6 +5,7 @@ import com.warehouse.app.dto.request.RequestCreateProduct;
 import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.ResponseDetailProduct;
 import com.warehouse.app.dto.response.ResponseListProduct;
+import com.warehouse.app.dto.response.ResponseListProductVariant;
 import com.warehouse.app.entities.*;
 import com.warehouse.app.exception.BadRequestException;
 import com.warehouse.app.exception.NotFoundException;
@@ -184,6 +185,41 @@ public class MasterDataServiceImpl implements MasterDataService {
             productVariantUnitRepository.saveAll(productVariantUnitList);
             return "success";
         } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Override
+    public List<ResponseListProductVariant> getListVariants(String id) {
+        List<VariantProduct> variantProducts = variantProductRepository.findByProductId(id);
+        List<ResponseListProductVariant> responseListProductVariantList = new ArrayList<>();
+        try {
+
+            for (VariantProduct variantProduct : variantProducts) {
+
+                List<ResponseListProductVariant.Units> unitsList = new ArrayList<>();
+
+                for (ProductVariantUnit productVariantUnit : variantProduct.getVariantUnits()){
+                    ResponseListProductVariant.Units units = ResponseListProductVariant.Units.builder()
+                            .type(productVariantUnit.getUnit().getName())
+                            .parentType(productVariantUnit.getParentUnit() != null ? productVariantUnit.getParentUnit().getName() : null)
+                            .quantity(productVariantUnit.getQuantity())
+                            .build();
+                    unitsList.add(units);
+                }
+
+                ResponseListProductVariant responseListProductVariant = ResponseListProductVariant.builder()
+                        .name(variantProduct.getName())
+                        .id(variantProduct.getId())
+                        .uniqueCode(variantProduct.getUniqueCode())
+                        .imageUrl(variantProduct.getImageUrl())
+                        .description(variantProduct.getDescription())
+                        .units(unitsList)
+                        .build();
+                responseListProductVariantList.add(responseListProductVariant);
+            }
+            return  responseListProductVariantList;
+        }catch (Exception e){
             throw new SystemErrorException(e);
         }
     }

@@ -52,4 +52,9 @@ public class MasterDataControllerImpl implements MasterDataController {
 
         return ResponseHelper.createBaseResponse(masterDataService.createVariant(requestCreateVariant));
     }
+
+    @Override
+    public BaseResponse getListVariants(String id) {
+        return ResponseHelper.createBaseResponse(masterDataService.getListVariants(id));
+    }
 }
