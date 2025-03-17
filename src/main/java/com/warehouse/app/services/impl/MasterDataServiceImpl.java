@@ -2,19 +2,20 @@ package com.warehouse.app.services.impl;
 
 import com.warehouse.app.dto.request.RequestCreateCategory;
 import com.warehouse.app.dto.request.RequestCreateProduct;
+import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.ResponseDetailProduct;
 import com.warehouse.app.dto.response.ResponseListProduct;
-import com.warehouse.app.entities.Category;
-import com.warehouse.app.entities.Product;
+import com.warehouse.app.entities.*;
 import com.warehouse.app.exception.BadRequestException;
 import com.warehouse.app.exception.NotFoundException;
 import com.warehouse.app.exception.SystemErrorException;
-import com.warehouse.app.repositories.CategoryRepository;
-import com.warehouse.app.repositories.ProductRepository;
+import com.warehouse.app.repositories.*;
 import com.warehouse.app.services.AccountService;
 import com.warehouse.app.services.MasterDataService;
 import com.warehouse.app.utilities.EntityUtils;
 import com.warehouse.app.utilities.UtilsHelper;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -23,21 +24,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class MasterDataServiceImpl implements MasterDataService {
     private final CategoryRepository categoryRepository;
     private final AccountService accountService;
     private final ProductRepository productRepository;
-
-    public MasterDataServiceImpl(CategoryRepository categoryRepository, AccountService accountService, ProductRepository productRepository) {
-        this.categoryRepository = categoryRepository;
-        this.accountService = accountService;
-        this.productRepository = productRepository;
-    }
+    private final VariantProductRepository variantProductRepository;
+    private final UnitTypeRepository unitTypeRepository;
+    private final ProductVariantUnitRepository productVariantUnitRepository;
 
     @Override
     public String createNewCategory(RequestCreateCategory requestCreateCategory) {
         List<String> slugs = new ArrayList<>();
-        for (String name : requestCreateCategory.getName()){
+        for (String name : requestCreateCategory.getName()) {
             slugs.add(UtilsHelper.generateUniqueSlug(name));
         }
         Optional<Category> findCategory = categoryRepository.findAllBySlug(slugs);
@@ -47,7 +46,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 
         try {
             List<Category> categories = new ArrayList<>();
-            for (String name : requestCreateCategory.getName()){
+            for (String name : requestCreateCategory.getName()) {
                 String slug = UtilsHelper.generateUniqueSlug(name);
                 Category category = Category.builder()
                         .name(name)
@@ -57,13 +56,13 @@ public class MasterDataServiceImpl implements MasterDataService {
             }
             categoryRepository.saveAll(categories);
             return UtilsHelper.getMessage("category.created");
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
 
     @Override
-     public List<Category> getAllCategories() {
+    public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
@@ -75,7 +74,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         if (checkExistedProduct) {
             throw new BadRequestException("Product with name " + requestCreateProduct.getName() + " already exists");
         }
-        Product product  = Product.builder()
+        Product product = Product.builder()
                 .name(requestCreateProduct.getName())
                 .slug(slug)
                 .category(category)
@@ -84,8 +83,8 @@ public class MasterDataServiceImpl implements MasterDataService {
         EntityUtils.created(product, accountService.getCurrentAccountId());
         try {
             productRepository.save(product);
-            return  buildDetailProduct(product);
-        }catch (Exception e){
+            return buildDetailProduct(product);
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
@@ -108,7 +107,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         try {
             productRepository.save(product);
             return buildDetailProduct(product);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
@@ -120,7 +119,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         List<ResponseListProduct> productsList = buildListProducts(productPage.getContent());
         try {
             return new PageImpl<>(productsList, pageable, productPage.getTotalElements());
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
@@ -130,7 +129,61 @@ public class MasterDataServiceImpl implements MasterDataService {
         Product product = productRepository.findById(id).orElseThrow(() -> new NotFoundException("Product not found"));
         try {
             return buildDetailProduct(product);
-        }catch (Exception e){
+        } catch (Exception e) {
+            throw new SystemErrorException(e);
+        }
+    }
+
+    @Transactional
+    @Override
+    public String createVariant(RequestCreateVariant requestCreateVariant) {
+        Product product = productRepository.findById(requestCreateVariant.getProductId()).orElseThrow(() -> new NotFoundException("Product not found"));
+        String slug = UtilsHelper.generateUniqueSlug(requestCreateVariant.getName());
+        String currentAccountId = accountService.getCurrentAccountId();
+        Optional<VariantProduct> findVariant = variantProductRepository.findBySlugOrUniqueCodeAndActiveIsTrue(slug, requestCreateVariant.getUniqueCode());
+
+        if (findVariant.isPresent()) {
+            if (findVariant.get().getSlug().equals(slug)) {
+                throw new BadRequestException("Variant with name " + requestCreateVariant.getName() + " already exists");
+            }
+            if (findVariant.get().getUniqueCode().equals(requestCreateVariant.getUniqueCode())) {
+                throw new BadRequestException("unique code for " + requestCreateVariant.getName() + " already exists");
+            }
+        }
+
+
+        VariantProduct buildVariantProduct = VariantProduct.builder()
+                .product(product)
+                .name(requestCreateVariant.getName())
+                .description(requestCreateVariant.getDescription())
+                .slug(slug)
+                .imageUrl(requestCreateVariant.getImageUrl())
+                .uniqueCode(requestCreateVariant.getUniqueCode())
+                .build();
+        EntityUtils.created(buildVariantProduct, currentAccountId);
+        VariantProduct variantProduct = variantProductRepository.save(buildVariantProduct);
+
+        try {
+            List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
+            for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
+                UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
+                UnitType parentUnit  = null;
+                if (units.getParentId() != null) {
+                   parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
+                }
+                ProductVariantUnit productVariantUnit = ProductVariantUnit.builder()
+                        .unit(unit)
+                        .parentUnit(parentUnit)
+                        .variantProduct(variantProduct)
+                        .quantity(units.getValue())
+                        .build();
+                EntityUtils.created(productVariantUnit, currentAccountId);
+                productVariantUnitList.add(productVariantUnit);
+
+            }
+            productVariantUnitRepository.saveAll(productVariantUnitList);
+            return "success";
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }
@@ -151,7 +204,7 @@ public class MasterDataServiceImpl implements MasterDataService {
         return responseListProducts;
     }
 
-    private ResponseDetailProduct buildDetailProduct(Product product){
+    private ResponseDetailProduct buildDetailProduct(Product product) {
         return ResponseDetailProduct.builder()
                 .id(product.getId())
                 .name(product.getName())

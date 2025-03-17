@@ -4,6 +4,7 @@ import com.warehouse.app.annotations.BaseControllerImpl;
 import com.warehouse.app.controllers.MasterDataController;
 import com.warehouse.app.dto.request.RequestCreateCategory;
 import com.warehouse.app.dto.request.RequestCreateProduct;
+import com.warehouse.app.dto.request.RequestCreateVariant;
 import com.warehouse.app.dto.response.BaseResponse;
 import com.warehouse.app.services.MasterDataService;
 import com.warehouse.app.utilities.ResponseHelper;
@@ -44,5 +45,11 @@ public class MasterDataControllerImpl implements MasterDataController {
     @Override
     public BaseResponse getDetailProduct(String id) {
         return ResponseHelper.createBaseResponse(masterDataService.getDetailProduct(id));
+    }
+
+    @Override
+    public BaseResponse createVariant(RequestCreateVariant requestCreateVariant) {
+
+        return ResponseHelper.createBaseResponse(masterDataService.createVariant(requestCreateVariant));
     }
 }
