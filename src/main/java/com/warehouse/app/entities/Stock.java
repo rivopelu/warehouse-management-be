@@ -11,17 +11,15 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_variant_unit")
-public class ProductVariantUnit extends BaseEntity {
-
-    @JoinColumn(name = "parent_unit_id")
+@Table(name = "stock")
+public class Stock extends BaseEntity {
+    @JoinColumn(name = "warehouse_id")
     @ManyToOne
-    @JsonIgnore
-    private UnitType parentUnit;
+    private Warehouse warehouse;
 
-    @JoinColumn(name = "unit_id")
+    @JoinColumn(name = "unit_type_id")
     @ManyToOne
-    private UnitType unit;
+    private UnitType unitType;
 
     @JoinColumn(name = "variant_product_id")
     @ManyToOne
@@ -29,11 +27,4 @@ public class ProductVariantUnit extends BaseEntity {
 
     @Column(name = "quantity")
     private Integer quantity;
-
-    @Column(name = "is_main_parent")
-    private Boolean isMainParent;
-
-    @Column(name = "count")
-    private Integer count;
-
 }

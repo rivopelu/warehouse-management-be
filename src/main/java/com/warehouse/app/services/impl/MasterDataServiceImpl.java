@@ -168,16 +168,16 @@ public class MasterDataServiceImpl implements MasterDataService {
         boolean isHasMainParent = false;
         List<ProductVariantUnit> productVariantUnitList = new ArrayList<>();
         for (RequestCreateVariant.Units units : requestCreateVariant.getUnits()) {
-            UnitType unit =  unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
-            UnitType parentUnit  = null;
+            UnitType unit = unitTypeRepository.findById(units.getTypeId()).orElseThrow(() -> new NotFoundException("Unit type not found"));
+            UnitType parentUnit = null;
             if (units.getParentId() != null) {
-                parentUnit =  unitTypeRepository.findById(units.getParentId()).orElse(null);
+                parentUnit = unitTypeRepository.findById(units.getParentId()).orElse(null);
             }
-            if (units.getParentId() == null){
-                if (!isHasMainParent){
+            if (units.getParentId() == null) {
+                if (!isHasMainParent) {
                     isHasMainParent = true;
-                } else{
-                    throw new BadRequestException("Parent unit id "  + " is already exists");
+                } else {
+                    throw new BadRequestException("Parent unit id " + " is already exists");
                 }
             }
             Boolean isMainParent = parentUnit == null;
@@ -213,7 +213,7 @@ public class MasterDataServiceImpl implements MasterDataService {
 
                 List<ResponseListProductVariant.Units> unitsList = new ArrayList<>();
 
-                for (ProductVariantUnit productVariantUnit : variantProduct.getVariantUnits()){
+                for (ProductVariantUnit productVariantUnit : variantProduct.getVariantUnits()) {
                     ResponseListProductVariant.Units units = ResponseListProductVariant.Units.builder()
                             .type(productVariantUnit.getUnit().getName())
                             .parentType(productVariantUnit.getParentUnit() != null ? productVariantUnit.getParentUnit().getName() : null)
@@ -236,8 +236,8 @@ public class MasterDataServiceImpl implements MasterDataService {
                         .build();
                 responseListProductVariantList.add(responseListProductVariant);
             }
-            return  responseListProductVariantList;
-        }catch (Exception e){
+            return responseListProductVariantList;
+        } catch (Exception e) {
             throw new SystemErrorException(e);
         }
     }

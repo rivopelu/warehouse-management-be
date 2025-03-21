@@ -30,4 +30,5 @@
         <include file="/db/changelog/1.4.6_add_column_unique_code_varant.xml"/>
         <include file="/db/changelog/1.4.7_add_fk_for_unit_variant.xml"/>
         <include file="/db/changelog/1.4.8_add_count_and_is_parent.xml"/>
+        <include file="/db/changelog/1.4.9_add_table_stock.xml"/>
 </databaseChangeLog>
