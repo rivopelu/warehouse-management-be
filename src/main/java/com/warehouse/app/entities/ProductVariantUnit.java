@@ -1,6 +1,7 @@
 package com.warehouse.app.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ public class ProductVariantUnit extends BaseEntity {
 
     @JoinColumn(name = "parent_unit_id")
     @ManyToOne
+    @JsonIgnore
     private UnitType parentUnit;
 
     @JoinColumn(name = "unit_id")
